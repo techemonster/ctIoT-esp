@@ -12,7 +12,7 @@
 
 
 /////change the variable to your Raspberry Pi IP address so it connects to your MQTT broker
-const char* mqtt_server="192.168.0.83";  //wire
+const char* mqtt_server="192.168.43.57";  //wire
 //const char* mqtt_server1="192.168.0.86"; //wifi
 //const char* mqtt_server2="192.168.43.251"; //linga hotspot
 
@@ -45,9 +45,9 @@ bool network_failed = false;
 
 void setup_wifi()
 {   
-        
+    WiFi.mode(WIFI_OFF);
     ///////////set the  parameters according to the the AP settings
-    const char* ssid="Cosmic Tech";//set this as your main SSID
+    const char* ssid="CosmicTech";//set this as your main SSID
     const char* password="$3nt!n3l";//set this as your main AP passkey
     int connect_retry_flag=0;//varibale to find out how many times esp tried to connect to wifi
     int connect_retry_limit=5;//set the retry count limit
@@ -61,16 +61,17 @@ void setup_wifi()
     Serial.println();
     Serial.print("trying to connect main AP:");
     Serial.println(ssid);
-    WiFi.mode(WIFI_STA);
+    //WiFi.mode(WIFI_STA);
     WiFi.begin(ssid,password);
+    
     while(WiFi.status() != WL_CONNECTED & connect_retry_flag!=connect_retry_limit )
     {   //if the connection is not made and the connection failed 
       
               Serial.println("connection failed!");
               delay(1000);
               connect_retry_flag++; //Increment the connection retry flag
-        
     }
+    
     //Serial.println(connect_retry_flag);
     if(connect_retry_flag==connect_retry_limit & WiFi.status() != WL_CONNECTED)
     {
@@ -363,12 +364,22 @@ Serial.println();
 void reconnect()
 {
 /////////Loop until we are connected
+     
      while(!client.connected())
-     {    if(client.connected())
-                break;
-          Serial.println("Attempting MQTT connection");
-          client.connect("ESP8266Client");
-          delay(3000);
+     {    
+          if(WiFi.status()==WL_CONNECTED)
+           {
+                  if(client.connected())
+                        break;
+                  Serial.println("Attempting MQTT connection");
+                  client.connect("ESP8266Client");
+                  delay(1000);
+            }
+            else
+            {
+                  Serial.println("connection lost");
+            }
+             
      }
       ////attempt to connect
      
@@ -427,68 +438,75 @@ void setup()
 ///////// For this project, you don't need to change anything in the loop function.
 //////// Basically it ensures that you ESP is connected to your broker
 
-
 void loop()
 {
-  if(network_failed == false)
-   { 
-          if(!client.connected())
-          {
-                Serial.println("reconnect");
-                reconnect();
-          }
-          ArduinoOTA.handle();
-   }
-
-/////// put your main code here, to run repeatedly:
-  
-      if(!client.loop())
-      {
-            client.connect("ESP8266Client");
-      }
-      unsigned long timenow=millis();
-      unsigned long prvstime=0;
-//      if(timenow-prvstime>=5000)
-//      {    prvstime=timenow;
-//           h=dht.readHumidity();
-//           t=dht.readTemperature();
-//           Serial.print("Hall Humidity : ");
-//           Serial.println(h);
-//           Serial.print("Hall Temperature : ");
-//           Serial.println(t);
-//           
-//      }
+  if(WiFi.waitForConnectResult()!=WL_CONNECTED)
+  {
+      Serial.println("connection lost");
+      setup_wifi();
+  }
+  else
+  {
+        Serial.println("connected to a wifi netowrk");
+        if(network_failed == false)
+         { 
+                if(!client.connected())
+                {
+                      Serial.println("reconnect");
+                      reconnect();
+                }
+                ArduinoOTA.handle();
+         }
       
-//    /////Check if any reads failed and exit early (to try again).
-//    if (isnan(h) || isnan(t))
-//    {
-//          Serial.println("Failed to read from DHT sensor!");
-//          delay(5000);
-//          return;
-//    }
-//    /////Computes temperature values in Celsius
-//    /////float hic = dht.computeHeatIndex(t, h, false);
-//    static char temperatureTemp[7];
-//    dtostrf(t, 5, 2, temperatureTemp);
-//    
-//    // Uncomment to compute temperature values in Fahrenheit 
-//    
-//    // float hif = dht.computeHeatIndex(f, h);
-//    // static char temperatureTemp[7];
-//    // dtostrf(hic, 6, 2, temperatureTemp);
-//    
-//    static char humidityTemp[7];
-//    dtostrf(h, 6, 2, humidityTemp);
-//    
-//    //////Publishes temperature and Humidity values
-//    client.publish("hall/esp/temp",temperatureTemp);
-//    client.publish("hall/esp/temp",temperatureTemp);
-//        Serial.print("Humidity: ");
-//    Serial.print(h);
-//    Serial.print(" %\t Temperature: ");
-//    Serial.print(t);
-//    Serial.print(" *C ");
-
-   
-
+      /////// put your main code here, to run repeatedly:
+        
+            if(!client.loop())
+            {
+                  client.connect("ESP8266Client");
+            }
+            unsigned long timenow=millis();
+            unsigned long prvstime=0;
+      //      if(timenow-prvstime>=5000)
+      //      {    prvstime=timenow;
+      //           h=dht.readHumidity();
+      //           t=dht.readTemperature();
+      //           Serial.print("Hall Humidity : ");
+      //           Serial.println(h);
+      //           Serial.print("Hall Temperature : ");
+      //           Serial.println(t);
+      //           
+      //      }
+            
+      //    /////Check if any reads failed and exit early (to try again).
+      //    if (isnan(h) || isnan(t))
+      //    {
+      //          Serial.println("Failed to read from DHT sensor!");
+      //          delay(5000);
+      //          return;
+      //    }
+      //    /////Computes temperature values in Celsius
+      //    /////float hic = dht.computeHeatIndex(t, h, false);
+      //    static char temperatureTemp[7];
+      //    dtostrf(t, 5, 2, temperatureTemp);
+      //    
+      //    // Uncomment to compute temperature values in Fahrenheit 
+      //    
+      //    // float hif = dht.computeHeatIndex(f, h);
+      //    // static char temperatureTemp[7];
+      //    // dtostrf(hic, 6, 2, temperatureTemp);
+      //    
+      //    static char humidityTemp[7];
+      //    dtostrf(h, 6, 2, humidityTemp);
+      //    
+      //    //////Publishes temperature and Humidity values
+      //    client.publish("hall/esp/temp",temperatureTemp);
+      //    client.publish("hall/esp/temp",temperatureTemp);
+      //        Serial.print("Humidity: ");
+      //    Serial.print(h);
+      //    Serial.print(" %\t Temperature: ");
+      //    Serial.print(t);
+      //    Serial.print(" *C ");
+      
+         
+  }
 }
