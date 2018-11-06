@@ -1,0 +1,84 @@
+.dashboard_container{
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+}
+.child{
+  width:33%;
+   border:1px solid blue;
+   display: flex;
+   flex-direction: column;
+   padding: 10px ;
+}
+.container1 .buttonStyle1 {
+  background-color: green;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+.container1 .buttonStyle2 {
+  background-color: blue;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+
+.container1{
+  padding:20px 20px 20px 0
+}
+
+
+@media screen and (min-width: 800px) 
+{
+  .dashboard_container{
+
+    width: 100%;
+  }
+  .child{
+    width:33%;
+     border:1px solid blue;
+     display: flex;
+     flex-direction: column;
+     padding: 10px ;
+  }
+  .container1 .buttonStyle1 {
+    background-color: green;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+  }
+  .container1 .buttonStyle2 {
+    background-color: red;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+  }
+  
+  .container1{
+    padding:20px 20px 20px 0
+  }
+}

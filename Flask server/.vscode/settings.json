@@ -1,0 +1,4 @@
+{
+    "python.pythonPath": "${workspaceFolder}/fapp/bin/python",
+    "python.linting.enabled": false
+}

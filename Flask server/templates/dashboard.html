@@ -1,0 +1,146 @@
+{%extends 'layout.html'%}
+
+{%block body%}
+<script>
+function hi(e){
+        console.log(e.target.value);
+}
+</script>
+
+<h1>Dashboard <small>Welcome {{session.username}}</small></h1>
+<div class="dashboard_container">
+                <div class="child">
+                        <div>
+                                <h3>section:A</h3>
+                                <!-- toggle switch -->
+                                <form method="POST" action="">
+                                        <label class="switch"><input type="checkbox" id="togBtn" name="toggleA1">
+                                                <div class="slider round">
+                                                        <span class="on">ON </span>
+                                                        <span class="off">OFF </span>  
+                                                </div>
+                                        </label>
+                                </form>
+
+                        </div>
+                        <div>
+                                <form method="POST" action="">
+                
+                                        <div class="container1" style="padding:8px 8px 8px 0">switch1 :
+                                                <button type="submit" class="buttonStyle1" value="ON" name="switchA1">ON</button>
+                                                <button type="submit" class="buttonStyle2" value="OFF" name="switchA1">OFF</button>
+                                        </div>
+
+                                        <div class="container1" style="padding:8px 8px 8px 0">switch2 :
+                                                <button type="submit" class="buttonStyle1" value="ON" name="switchA2">ON</button>
+                                                <button type="submit" class="buttonStyle2" value="OFF" name="switchA2">OFF</button>
+                                        </div>
+
+                                        <div class="container1" style="padding:8px 8px 8px 0">switch3 :
+                                                <button type="submit" class="buttonStyle1" value="ON" name="switchA3">ON</button>
+                                                <button type="submit" class="buttonStyle2" value="OFF" name="switchA3">OFF</button>
+                                        </div>
+                                        
+                                        <div class="container1" style="padding:8px 8px 8px 0">switch4 :
+                                                <button type="submit" class="buttonStyle1" value="ON" name="switchA4">ON</button>
+                                                <button type="submit" class="buttonStyle2" value="OFF" name="switchA4">OFF</button>
+                                        </div>
+
+                                        <div class="container1" style="padding:8px 8px 8px 0">switch5 :
+                                                <button type="submit" class="buttonStyle1" value="ON" name="switchA5">ON</button>
+                                                <button type="submit" class="buttonStyle2" value="OFF" name="switchA5">OFF</button>
+                                        </div>
+
+                                        <div class="container1" style="padding:8px 8px 8px 0">switch6 :
+                                                <button type="submit" class="buttonStyle1" value="ON" name="switchA6">ON</button>
+                                                <button type="submit" class="buttonStyle2" value="OFF" name="switchA6">OFF</button>
+                                        </div>
+
+                                        <div class="container1" style="padding:8px 8px 8px 0">switch7 :
+                                                <button type="submit" class="buttonStyle1" value="ON" name="switchA7">ON</button>
+                                                <button type="submit" class="buttonStyle2" value="OFF" name="switchA7">OFF</button>
+                                        </div>
+
+                                        <div class="container1" style="padding:8px 8px 8px 0">switch8 :
+                                                <button type="submit" class="buttonStyle1" value="ON" name="switchA8">ON</button>
+                                                <button type="submit" class="buttonStyle2" value="OFF" name="switchA8">OFF</button>
+                                        </div>
+                                        <div class="container1" style="padding:8px 8px 8px 0">
+                                                <button type="submit" class="buttonStyle1" value="rstespconf" name="rst">RESET</button>
+                                        </div>
+                                </form>
+                        </div>
+                        <div>
+                                        <form action="" method="POST"
+                                                oninput="x.value=parseInt(a.value)+parseInt(b.value)">
+                                                0
+                                                <input type="range" id="a" name="bright" max="1023" value="{{brightness}}">
+                                                {{brightness}}
+                                                
+                                                <!-- <output name="x" for="a b"></output> -->
+                                                <!-- <br><br> -->
+                                                <input type="submit">
+                                        </form>        
+                        </div>
+
+                </div>
+                <div class="child">
+                        <div>
+                                        <h3>section:B</h3>
+                                <label class="switch"><input type="checkbox" id="togBtn">
+                                        <div class="slider round">
+                                                <span class="on">ON </span>
+                                                <span class="off">OFF </span>
+                                        </div>
+                                </label>
+                        </div>
+                        <div>
+                                <form method="POST" action="">
+                
+                                        <div class="container1" style="padding:10px 10px 20px 0">switch1 :
+                                                <input type="submit" value="ON" name="switchB1" />
+                                                <input type="submit" value="OFF" name="switchB1" />
+                                        </div>
+                
+                                        <div class="slidecontainer">
+                                                <p>Default range slider:</p>
+                                                <input type="range" onchange="dashboard(event)" min="1" max="100" value="10" name="sliderB1" />
+                
+                                        </div>
+                                </form>
+                        </div>
+                </div>
+                <div class="child">
+                        <div>
+                                        <h3>section:c</h3>
+                                <form method="POST" action="">
+                                        <label class="switch"><input type="checkbox" id="togBtn">
+                                                <div class="slider round">
+                                                        <span class="on" value="ON" name="toggle">ON </span>
+                                                        <span class="off" value="OFF" name="toggle">OFF </span>
+                                                </div>
+                                        </label>
+                                </form>
+                        </div>
+                        <div>
+                                <form method="POST" action="">
+                
+                                        <div class="container1" style="padding:10px 10px 20px 0">switch1 :
+                                                <input type="submit" value="ON" name="switchC1" />
+                                                <input type="submit" value="OFF" name="switchC1" />
+                                        </div>
+                
+                                        <div class="slidecontainer">
+                                                <p>Default range slider:</p>
+                                                <input type="range" onchange="dashboard(event)" min="1" max="100" value="10" name="sliderC1" />
+                
+                                        </div>
+                                </form>
+                        </div>
+                </div>
+                
+                
+</div>
+       
+{%endblock%}
+
