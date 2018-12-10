@@ -8,13 +8,14 @@
 
 #include "DHT.h"
 
-#define DHTTYPE 22
-
+#define DHTTYPE 11
 
 /////change the variable to your Raspberry Pi IP address so it connects to your MQTT broker
-const char* mqtt_server="192.168.43.57";  //wire
-//const char* mqtt_server1="192.168.0.86"; //wifi
-//const char* mqtt_server2="192.168.43.251"; //linga hotspot
+const char* mqtt_server="192.168.0.83";  //rpi wire
+//const char* mqtt_server1="192.168.0.86"; //rpi wifi
+//const char* mqtt_server2="192.168.43.57"; //linga hotspot
+//const char* mqtt_username="linga";
+//const char* mqtt_password="b1211141bx3u";
 
 //////Initializes the espClient
 void callback(String topic, byte* payload, unsigned int length);
@@ -41,69 +42,82 @@ DHT dht(DHTpin,DHTTYPE);
 
 //////Dont change the function below this function your esp to your router
 
-bool network_failed = false;
-
-void setup_wifi()
-{   
-    WiFi.mode(WIFI_OFF);
+    String network;
     ///////////set the  parameters according to the the AP settings
-    const char* ssid="CosmicTech";//set this as your main SSID
-    const char* password="$3nt!n3l";//set this as your main AP passkey
+    const char* ssid="placeholder";//set this as your main SSID
+    const char* password="placeholder";//set this as your main AP passkey
     int connect_retry_flag=0;//varibale to find out how many times esp tried to connect to wifi
     int connect_retry_limit=5;//set the retry count limit
+
+    int connect_retry_flag1=0;
+    int connect_retry_limit1=10;
     /////////////////////////////////////////////////////
+
+
+    const char* mainnetworkSSID="Cosmic Tech";
+    const char* mainnetworkPASS="$3nt!n3l";
+
     
     //////////set these parameters acording to cosmic Tech service AP settings////
     const char* cosmicServiceSSID="linga";
     const char* cosmicServicePASS="linga1114";
     //////////////////////////////////////////////////////
+
+
+void setup_wifi()
+{   connect_retry_flag=0;
+    ssid = mainnetworkSSID;
+    password = mainnetworkPASS;
+    WiFi.mode(WIFI_OFF);    
     delay(2000);
     Serial.println();
     Serial.print("trying to connect main AP:");
     Serial.println(ssid);
-    //WiFi.mode(WIFI_STA);
+    WiFi.mode(WIFI_STA);
     WiFi.begin(ssid,password);
-    
-    while(WiFi.status() != WL_CONNECTED & connect_retry_flag!=connect_retry_limit )
-    {   //if the connection is not made and the connection failed 
-      
+    while(WiFi.status() != WL_CONNECTED & connect_retry_flag!=connect_retry_limit ) //if the connection is not made and the connection failed 
+    {   
               Serial.println("connection failed!");
-              delay(1000);
+              delay(2000);
               connect_retry_flag++; //Increment the connection retry flag
+        
     }
+   
     
     //Serial.println(connect_retry_flag);
     if(connect_retry_flag==connect_retry_limit & WiFi.status() != WL_CONNECTED)
-    {
+    {  
+      connect_retry_flag1=0;
+        network = "cosmicnetwork";
+        WiFi.mode(WIFI_OFF);
+        delay(2000);
         ///if the connection coneection failed flag is  set at 5 login to the CosmicTech AP
         Serial.println("");
         ssid=cosmicServiceSSID;
         password=cosmicServicePASS;//change the parameters to cosmicService parameters
         Serial.print("trying to connect Cosmictech service AP:");
         Serial.println(ssid);
+        WiFi.mode(WIFI_STA);
         WiFi.begin(ssid,password);
-        int connect_retry_flag1=0;
-        int connect_retry_limit1=5;
-        while(WiFi.waitForConnectResult()!=WL_CONNECTED)
+        while(WiFi.status()!=WL_CONNECTED)
         {
             Serial.println("Connection To CosmicTech service Ap failed Reconnecting");
-            delay(1000);
+            delay(2000);
+            connect_retry_flag1++;
             if(connect_retry_flag1==connect_retry_limit1)
-            {
-                setup_wifi();
+            {setup_wifi();
             }
-            connect_retry_flag1 ++;
+            
         }
         Serial.println("connected to CosmicTech service AP");
-        network_failed = false;
         //Serial.println(WiFi.localIP());
     }
     else
     {
     ///////if it doesnt exceeds connect_retry_limit and connects to main AP
         Serial.print("connected to main AP: ");
-        network_failed = false;
         Serial.println(ssid);
+        network="mainnetwork";
         //Serial.println(WiFi.localIP());
     }
 
@@ -111,10 +125,10 @@ void setup_wifi()
     // ArduinoOTA.setPort(8266);
 
     // Hostname defaults to esp8266-[ChipID]
-    //ArduinoOTA.setHostname((const char *)"esp");
+    ArduinoOTA.setHostname((const char *)"ESP_ConferanceRoom");
 
     // No authentication by default
-    ArduinoOTA.setPassword("sentinel");
+    ArduinoOTA.setPassword((const char *)"sentinel");
     // Password can be set with it's md5 value as well
     // MD5(OTA) = 21232f297a57a5a743894a0e4a801fc3;
     //ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
@@ -165,17 +179,7 @@ void setup_wifi()
   Serial.println("Ready for OTA update");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
-    // Port defaults to 8266
-    // ArduinoOTA.setPort(8266);
-
-    // Hostname defaults to esp8266-[ChipID]
-    //ArduinoOTA.setHostname((const char *)"esp");
-
-    // No authentication by default
-    //ArduinoOTA.setPassword((const char *)"8266");
-    // Password can be set with it's md5 value as well
-    // MD5(OTA) = 21232f297a57a5a743894a0e4a801fc3;
-    //ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
+    
    
 ////////////DO NOT CHANGE ANY THING ABOVE THIS LINE/////////////////////////////////
 
@@ -190,8 +194,9 @@ void setup_wifi()
 // your ESP8266 is subscribed you can actually do something
 
 void callback(String topic,byte* payload,unsigned int length)
-{
-      Serial.print("Message arrived on topic:");
+{     
+      Serial.println();
+      Serial.print("Message arrived on from the server:");
       Serial.print(topic);
       Serial.print(". Message : ");
       String msg;
@@ -201,7 +206,6 @@ void callback(String topic,byte* payload,unsigned int length)
       }
       Serial.println(msg);      
 
-Serial.println();
 
 ///////to reset the esp after uploading the code with usb or with OTA
 if(topic=="rst/esp/conf" && msg=="reset")
@@ -214,14 +218,14 @@ if(topic=="rst/esp/conf" && msg=="reset")
 if(topic=="hall/esp/gpio16")
 {
       Serial.print("Changing GPIO 16 to : ");
-      if(msg=="1")
+      if(msg=="1" || msg=="ON")
       {
             digitalWrite(pin16,HIGH);
             Serial.print("ON");
             client.publish("office/esp/gpio16","ON");
 
       }
-      else if(msg=="0")
+      else if(msg=="0" || msg=="OFF")
       {
             digitalWrite(pin16,LOW);
             Serial.print("LOW");
@@ -233,14 +237,14 @@ if(topic=="hall/esp/gpio16")
 if(topic=="hall/esp/gpio5")
 {
       Serial.print("Changing GPIO 5 to : ");
-      if(msg=="1")
+      if(msg=="1" || msg=="ON")
       {
             digitalWrite(pin5,HIGH);
             Serial.print("ON");
             client.publish("office/esp/gpio5","ON");
             
       }
-      else if(msg=="0")
+      else if(msg=="0" || msg=="OFF")
       {
             digitalWrite(pin5,LOW);
             Serial.print("LOW");
@@ -252,13 +256,13 @@ if(topic=="hall/esp/gpio5")
 if(topic=="hall/esp/gpio4")
 {
       Serial.print("Changing GPIO 4 to : ");
-      if(msg=="1")
+      if(msg=="1" || msg=="ON")
       {
             digitalWrite(pin4,HIGH);
             Serial.print("ON");
             client.publish("office/esp/gpio4","ON");
       }
-      else if(msg=="0")
+      else if(msg=="0" || msg=="OFF")
       {
             digitalWrite(pin4,LOW);
             Serial.print("LOW");
@@ -270,13 +274,13 @@ if(topic=="hall/esp/gpio4")
 if(topic=="hall/esp/gpio2")
 {
       Serial.print("Changing GPIO 2 to : ");
-      if(msg=="1")
+      if(msg=="1" || msg=="ON")
       {
             digitalWrite(pin2,HIGH);
             Serial.print("ON");
             client.publish("office/esp/gpio2","ON");
       }
-      else if(msg=="0")
+      else if(msg=="0" || msg=="OFF")
       {
             digitalWrite(pin2,LOW);
             Serial.print("LOW");
@@ -288,13 +292,13 @@ if(topic=="hall/esp/gpio2")
 if(topic=="hall/esp/gpio14")
 {
       Serial.print("Changing GPIO 14 to : ");
-      if(msg=="1")
+      if(msg=="1" || msg=="ON")
       {
             digitalWrite(pin14,HIGH);
             Serial.print("ON");
             client.publish("office/esp/gpio14","ON");
       }
-      else if(msg=="0")
+      else if(msg=="0" || msg=="OFF")
       {
             digitalWrite(pin14,LOW);
             Serial.print("LOW");
@@ -306,13 +310,13 @@ if(topic=="hall/esp/gpio14")
 if(topic=="hall/esp/gpio12")
 {
       Serial.print("Changing GPIO 12 to : ");
-      if(msg=="1")
+      if(msg=="1" || msg=="ON")
       {
             digitalWrite(pin12,HIGH);
             Serial.print("ON");
             client.publish("office/esp/gpio12","ON");
       }
-      else if(msg=="0")
+      else if(msg=="0" || msg=="OFF")
       {
             digitalWrite(pin12,LOW);
             Serial.print("LOW");
@@ -324,13 +328,13 @@ if(topic=="hall/esp/gpio12")
 if(topic=="hall/esp/gpio13")
 {
       Serial.print("Changing GPIO 13 to : ");
-      if(msg=="1")
+      if(msg=="1" || msg=="ON")
       {
             digitalWrite(pin13,HIGH);
             Serial.print("ON");
             client.publish("office/esp/gpio13","ON");
       }
-      else if(msg=="0")
+      else if(msg=="0" || msg=="OFF")
       {
             digitalWrite(pin13,LOW);
             Serial.print("LOW");
@@ -342,13 +346,13 @@ if(topic=="hall/esp/gpio13")
 if(topic=="hall/esp/gpio15")
 {
       Serial.print("Changing GPIO 15 to : ");
-      if(msg=="1")
+      if(msg=="1" || msg=="ON")
       {
             digitalWrite(pin15,HIGH);
             Serial.print("ON");
             client.publish("office/esp/gpio15","ON");
       }
-      else if(msg=="0")
+      else if(msg=="0" || msg=="OFF")
       {
             digitalWrite(pin15,LOW);
             Serial.print("LOW");
@@ -364,22 +368,14 @@ Serial.println();
 void reconnect()
 {
 /////////Loop until we are connected
-     
      while(!client.connected())
-     {    
-          if(WiFi.status()==WL_CONNECTED)
-           {
-                  if(client.connected())
-                        break;
-                  Serial.println("Attempting MQTT connection");
-                  client.connect("ESP8266Client");
-                  delay(1000);
-            }
-            else
-            {
-                  Serial.println("connection lost");
-            }
-             
+     {    if(client.connected())
+                break;
+          Serial.println("Attempting MQTT connection");
+          client.connect("ESP8266Client");
+          delay(3000);
+          if(WiFi.status()!=WL_CONNECTED)
+           {setup_wifi();}
      }
       ////attempt to connect
      
@@ -397,8 +393,9 @@ void reconnect()
                 client.subscribe("hall/esp/gpio13");
                 client.subscribe("hall/esp/gpio15");
                 client.subscribe("rst/esp/conf");
-                client.publish("espstatus","changed pin");
+                client.publish("esp/signal","ready");
           }
+          
           else
           {
                 Serial.print("failed,rc=");
@@ -421,6 +418,7 @@ void setup()
 ////set the pinmodes here
         Serial.begin(115200);
         setup_wifi();
+        Serial.println(network);
         pinMode(16,OUTPUT);
         pinMode(5,OUTPUT);
         pinMode(4,OUTPUT);
@@ -438,75 +436,57 @@ void setup()
 ///////// For this project, you don't need to change anything in the loop function.
 //////// Basically it ensures that you ESP is connected to your broker
 
+
+
 void loop()
 {
-  if(WiFi.waitForConnectResult()!=WL_CONNECTED)
-  {
-      Serial.println("connection lost");
-      setup_wifi();
+ if(network == "cosmicnetwork" )
+  {     
+        ArduinoOTA.handle();
+        if(WiFi.status()!=WL_CONNECTED)
+        {setup_wifi();}
+    
   }
-  else
+    
+ 
+ if(network == "mainnetwork")
   {
-        Serial.println("connected to a wifi netowrk");
-        if(network_failed == false)
-         { 
-                if(!client.connected())
-                {
-                      Serial.println("reconnect");
-                      reconnect();
-                }
-                ArduinoOTA.handle();
-         }
-      
-      /////// put your main code here, to run repeatedly:
+        if(WiFi.status()!=WL_CONNECTED)
+        {setup_wifi();}
         
-            if(!client.loop())
-            {
-                  client.connect("ESP8266Client");
-            }
-            unsigned long timenow=millis();
-            unsigned long prvstime=0;
-      //      if(timenow-prvstime>=5000)
-      //      {    prvstime=timenow;
-      //           h=dht.readHumidity();
-      //           t=dht.readTemperature();
-      //           Serial.print("Hall Humidity : ");
-      //           Serial.println(h);
-      //           Serial.print("Hall Temperature : ");
-      //           Serial.println(t);
-      //           
-      //      }
-            
-      //    /////Check if any reads failed and exit early (to try again).
-      //    if (isnan(h) || isnan(t))
-      //    {
-      //          Serial.println("Failed to read from DHT sensor!");
-      //          delay(5000);
-      //          return;
-      //    }
-      //    /////Computes temperature values in Celsius
-      //    /////float hic = dht.computeHeatIndex(t, h, false);
-      //    static char temperatureTemp[7];
-      //    dtostrf(t, 5, 2, temperatureTemp);
-      //    
-      //    // Uncomment to compute temperature values in Fahrenheit 
-      //    
-      //    // float hif = dht.computeHeatIndex(f, h);
-      //    // static char temperatureTemp[7];
-      //    // dtostrf(hic, 6, 2, temperatureTemp);
-      //    
-      //    static char humidityTemp[7];
-      //    dtostrf(h, 6, 2, humidityTemp);
-      //    
-      //    //////Publishes temperature and Humidity values
-      //    client.publish("hall/esp/temp",temperatureTemp);
-      //    client.publish("hall/esp/temp",temperatureTemp);
-      //        Serial.print("Humidity: ");
-      //    Serial.print(h);
-      //    Serial.print(" %\t Temperature: ");
-      //    Serial.print(t);
-      //    Serial.print(" *C ");
+        
+        if(!client.connected())
+        {
+        
+          Serial.println("reconnect");
+          reconnect();
+        }
+        
+      if(!client.loop())
+      {
+            client.connect("ESP8266Client");
+      }
+      unsigned long int timenow=millis();
+      unsigned long int prvstime=0;
       
-         
-  }
+      if(timenow-prvstime>=5000)
+      {    prvstime=timenow;
+           h=dht.readHumidity();
+           t=dht.readTemperature();
+           Serial.print("Hall Humidity : ");
+           Serial.println(h);
+           Serial.print("Hall Temperature : ");
+           Serial.println(t);
+           
+        }
+      
+    /////Check if any reads failed and exit early (to try again).
+    if (isnan(h) || isnan(t))
+    {
+          Serial.println("Failed to read from DHT sensor!");
+          delay(5000);
+          return;
+    }
+
+}
 }
